@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: tf-model-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: model-server
+    spec:
+      volumes:
+      - name: nvidia-debug-tools # optional
+        hostPath:
+          path: /home/kubernetes/bin/nvidia/bin
+      - name: nvidia-libraries # required
+        hostPath:
+          path: /home/kubernetes/bin/nvidia/lib                                    
+      containers:
+      - name: model-serving-container
+        image: gcr.io/vishnuk-cloud/tensorflow-serving-inception:v3
+        resources:
+          limits:
+            alpha.kubernetes.io/nvidia-gpu: 1
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+        - name: nvidia-debug-tools
+          mountPath: /usr/local/bin/nvidia
+        - name: nvidia-libraries
+          mountPath: /usr/local/nvidia/lib64                                          
